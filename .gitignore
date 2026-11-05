@@ -1,0 +1,11 @@
+# build output
+bin/
+obj/
+dist/
+
+# editors / OS
+.vs/
+.vscode/
+.idea/
+*.user
+.DS_Store
