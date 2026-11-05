@@ -21,6 +21,11 @@ class Program
         receiver.askPort();
         return receiver.receiveFiles() ? 0 : 1;
 
+      case "serve":
+        WebShare share = new();
+        share.askPort();
+        return share.serve() ? 0 : 1;
+
       case "add":
         if (args.Length < 2) return usage();
         Config.addSendFiles(args.Skip(1));
@@ -54,6 +59,7 @@ class Program
 
         send                 send the files in your send list
         receive              wait for a sender and save its files
+        serve                share your send list in a web browser (phones etc.)
 
         add <file> [...]     add files to your send list
         list                 show the send list and save folder

@@ -2,6 +2,7 @@
 
 Send files between two computers on the same network — **just pick a port number**.
 No IP addresses, no accounts, no cloud. Files go straight from one machine to the other over your Wi-Fi / LAN.
+Need to get files onto a **phone**? `transferit serve` shows a QR code — scan it and download in the browser.
 
 ```
  sender                                   receiver
@@ -60,6 +61,7 @@ Open a new terminal afterwards so the `transferit` command is found.
 | `transferit clear` | Empty the send list |
 | `transferit savedir <folder>` | Set where received files are saved |
 | `transferit receive` | Wait for a sender and save its files |
+| `transferit serve` | Share the send list in a web browser (phones, tablets, any device) |
 | `transferit send` | Send everything in the send list |
 
 ### Sending files to a friend
@@ -81,6 +83,23 @@ transferit send
 
 Use the same port on both sides. Any number from 1024 to 65535 that isn't in use works.
 The receiver handles one transfer and then exits — run it again for the next one.
+
+### Getting files onto a phone (or any device with a browser)
+
+Nothing to install on the phone. On your computer:
+
+```bash
+transferit add ~/Pictures/photo.jpg video.mp4
+transferit serve
+# Port to share on: 8080
+```
+
+transferit prints a **QR code** and a link like `http://192.168.1.42:8080`.
+Scan the QR code with the phone's camera (or type the link into its browser) and tap a file
+to download it. With several files there's also a **Download all (.zip)** button.
+
+The phone must be on the **same Wi-Fi**. Sharing stays on until you press **Ctrl+C**,
+so several devices can download, as many times as they like.
 
 ---
 
@@ -114,6 +133,13 @@ If `receiver.cfg` is empty when you run `receive`, you'll be asked for a folder 
 - **Guest / public / school Wi-Fi** often blocks devices from seeing each other
   ("client isolation"). Use a normal home network.
 
+**The phone can't open the `serve` link**
+- Phone and computer on the **same Wi-Fi**? (Mobile data won't work, and neither will a phone hotspot
+  unless the computer is connected to that hotspot.)
+- **Firewall on the computer running `serve`:** open the port (`sudo ufw allow 8080`).
+- If several links are printed, try the others — the first one is a best guess.
+- Type `http://`, not `https://`.
+
 **`transferit: command not found`** — open a new terminal, or run `~/.local/bin/transferit`.
 
 **`Address already in use`** — another program is using that port. Pick a different number.
@@ -137,6 +163,10 @@ If `receiver.cfg` is empty when you run `receive`, you'll be asked for a folder 
    ```
    All integers are little-endian. Files are streamed, so large files don't use much memory.
 
+**Browser sharing (`serve`)** is a small built-in web server. The page lists the files in your
+send list; each one is downloaded by its position in the list (`/f/0`, `/f/1`, …) and
+`/all.zip` zips them on the fly. Nothing else on your computer can be requested.
+
 ---
 
 ## Security
@@ -148,6 +178,9 @@ transferit is meant for **networks you trust**, like your home Wi-Fi.
 - The receiver only accepts **one** transfer and then stops listening.
 - Incoming file names are stripped of folders, so a sender can't write outside your save folder.
 - Files with the same name as one already in the save folder are **overwritten**.
+- While `serve` is running, **anyone on the network** who opens the link can download the shared
+  files. Only the files in your send list are reachable, and nothing can be uploaded.
+  Stop it with Ctrl+C when you're done.
 
 ---
 
@@ -169,5 +202,6 @@ The packages from `build.sh` are what you upload to a GitHub Release.
 | `Receiver.cs` | Listens, receives files, saves them |
 | `Discovery.cs` | UDP broadcast so the sender can find the receiver |
 | `Config.cs` | Reads/writes `~/.config/transferit/` |
+| `WebShare.cs` | `serve`: web page + downloads for phones/browsers, QR code |
 | `Input.cs` | Port prompt |
 | `install.sh` / `build.sh` | Installer and release packaging |
